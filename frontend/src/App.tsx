@@ -1,12 +1,26 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import React from "react";
 import { list } from "./components/jsmaster/questions";
+import {useQuestionnaire} from "./context/QuestionnareContext";
+import IncorrectAnswerModal from "./components/jsmaster/IncorrectAnswerModal";
+import CorrectAnswerModal from "./components/jsmaster/CorrectAnswerModal";
 
 function App() {
   const [questionId, setQuestionId] = useState(1);
-
+  const {showIncorrectAnswerModal,setShowIncorrectAnswerModal} = useQuestionnaire();
   const question = list.find((q) => +q.id === questionId);
 
+  function jsQuizFormChangeHandler(e: React.ChangeEvent<HTMLInputElement>){
+     if(question?.answer === e.target.value){
+        setShowIncorrectAnswerModal(prev=>({...prev,correctAnswerModal:true}));
+     }
+     else{
+        setShowIncorrectAnswerModal(prev=>({...prev,incorrectAnswerModal:true}));
+     }
+  }
+
   return (
+    <>
     <div className="min-h-screen bg-slate-100 p-6">
       <div className="max-w-7xl mx-auto flex gap-6">
         {question && (
@@ -14,7 +28,7 @@ function App() {
             key={question.id}
             className="
               relative flex-1
-              bg-white
+               bg-white
               rounded-2xl
               shadow-lg
               border border-slate-200
@@ -45,7 +59,7 @@ function App() {
                   <button
                     onClick={() => setQuestionId((p) => p + 1)}
                     className="
-                      px-4 py-2 text-sm rounded-lg
+                      px-4 py-2 text-sm rounded-lg      
                       bg-blue-600 text-white
                       hover:bg-blue-700 transition
                     "
@@ -105,6 +119,7 @@ function App() {
                       name={question.id}
                       value={opt}
                       className="mt-1 accent-blue-600"
+                      onChange={jsQuizFormChangeHandler}
                     />
                   </label>
                 ))}
@@ -158,6 +173,11 @@ function App() {
         </div>
       </div>
     </div>
+
+    {showIncorrectAnswerModal.incorrectAnswerModal && <IncorrectAnswerModal question={question}/>}
+    {showIncorrectAnswerModal.correctAnswerModal && <CorrectAnswerModal/>}
+    
+    </>
   );
 }
 
